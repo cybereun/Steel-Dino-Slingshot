@@ -414,23 +414,33 @@ body {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.2);
 }
-
-.btn-restart-header {
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #ffedd5;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.restart-btn-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
 }
 
-.btn-restart-header:hover {
-  background: rgba(245, 158, 11, 0.25);
-  border-color: rgba(245, 158, 11, 0.5);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+.btn-restart-gameplay {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, hsl(24, 95%, 45%) 0%, hsl(35, 93%, 47%) 100%);
+  border: 1px solid rgba(251, 146, 60, 0.4);
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+  transition: all 0.25s ease;
+}
+
+.btn-restart-gameplay:hover {
+  filter: brightness(1.1);
+  box-shadow: 
+    0 6px 18px rgba(249, 115, 22, 0.4),
+    0 0 15px rgba(249, 115, 22, 0.2);
+  transform: scale(1.01);
 }
 
 .level-title {
@@ -1189,7 +1199,7 @@ body {
     width: 100% !important;
   }
 
-  .btn-back, .btn-restart-header {
+  .btn-back {
     padding: 4px 8px !important;
     font-size: 0.75rem !important;
     border-radius: 6px !important;
@@ -1315,6 +1325,22 @@ body {
   /* 가로 모드에서 캔버스 위 중복되는 좌상단 플로팅 뒤로가기 숨김 */
   .floating-back-btn {
     display: none !important;
+  }
+
+  /* 다시하기 버튼 우측 사이드 패널 맨 하단 배치 및 크기 제한 */
+  .restart-btn-wrapper {
+    margin-top: auto !important;
+    margin-bottom: 4px !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .btn-restart-gameplay {
+    padding: 8px 12px !important;
+    font-size: 0.85rem !important;
+    border-radius: 8px !important;
+    width: 90% !important;
   }
 
   /* 결과 모달창 극강의 초소형 최적화 */

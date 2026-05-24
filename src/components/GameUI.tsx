@@ -75,9 +75,6 @@ export const GameUI: React.FC<GameUIProps> = ({
           <button className="btn-back" onClick={onLobby}>
             ◀ 로비로
           </button>
-          <button className="btn-restart-header" onClick={onRestart} title="스테이지 다시 시작">
-            🔄 다시하기
-          </button>
           <span className="level-title">{levelData.name}</span>
 
           {/* 인게임 미니 배경 테마 선택기 */}
@@ -171,6 +168,15 @@ export const GameUI: React.FC<GameUIProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 인게임 실시간 다시하기 버튼 */}
+      {gameState === 'playing' && (
+        <div className="restart-btn-wrapper">
+          <button className="btn-restart-gameplay" onClick={onRestart} title="스테이지 처음부터 다시 도전">
+            다시 하기 🔄
+          </button>
+        </div>
+      )}
 
       {/* 게임 결과 모달 팝업 */}
       {gameState === 'gameover' && (
