@@ -142,7 +142,14 @@ function App() {
         </div>
       </div>
 
-      <div className={`app-root theme-${bgTheme}`}>
+      {/* 모바일 가로 모드 전용 플로팅 뒤로가기 버튼 */}
+      {appState !== 'lobby' && (
+        <button className="floating-back-btn" onClick={handleLobby} title="로비로 돌아가기">
+          ◀ 로비
+        </button>
+      )}
+
+      <div className={`app-root theme-${bgTheme} state-${appState}`}>
         {appState === 'lobby' ? (
         <div className="lobby-container animate-fade-in">
           <header className="lobby-header-wrapper">

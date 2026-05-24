@@ -24,6 +24,9 @@ interface Particle {
   alpha: number;
   life: number;
   maxLife: number;
+  text?: string;
+  font?: string;
+  gravityEffect?: boolean;
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -72,6 +75,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const activeDinoBodyRef = useRef<Matter.Body | null>(null);
   const splitDinosRef = useRef<Matter.Body[]>([]); // 프테라 분열체들 추적
   const hasUsedSkillRef = useRef(false);
+  const hasExplodedRef = useRef(false);
   const blockHpMapRef = useRef<Map<number, number>>(new Map()); // 바디 id별 HP 기록
   const enemyHpMapRef = useRef<Map<number, number>>(new Map());
   const initialEnemyCountRef = useRef(0);
@@ -225,12 +229,28 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     activeDinoBodyRef.current = null;
     splitDinosRef.current = [];
     hasUsedSkillRef.current = false;
+    hasExplodedRef.current = false;
     particlesRef.current = [];
 
     // 6) 충돌 감지 바인딩
     Matter.Events.on(engine, 'collisionStart', (event) => {
       event.pairs.forEach((pair) => {
         const { bodyA, bodyB } = pair;
+
+        // 공룡 포탄이 처음 어딘가(블록, 적, 바닥 등) 부딪혔을 때 화려한 속성별 폭발 연출
+        const isDinoCollision = 
+          (activeDinoBodyRef.current && (bodyA === activeDinoBodyRef.current || bodyB === activeDinoBodyRef.current)) ||
+          (splitDinosRef.current.length > 0 && (splitDinosRef.current.includes(bodyA) || splitDinosRef.current.includes(bodyB)));
+        
+        if (isDinoCollision && !hasExplodedRef.current) {
+          hasExplodedRef.current = true;
+          // 충돌한 공룡 바디 특정
+          const dinoBody = (activeDinoBodyRef.current && (bodyA === activeDinoBodyRef.current || bodyB === activeDinoBodyRef.current))
+            ? activeDinoBodyRef.current 
+            : (splitDinosRef.current.includes(bodyA) ? bodyA : bodyB);
+          
+          triggerDinoExplosion(dinoBody);
+        }
         
         // 상대 속도로 가해진 데미지 계산
         const relativeSpeed = Math.sqrt(
@@ -272,6 +292,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           // 파괴 점수
           scoreRef.current += 100;
           onScoreChange(scoreRef.current);
+          createFloatingText(body.position.x, body.position.y - 15, "+100", "#f59e0b");
           
           // 블록 파괴 파편 파티클 생성
           const isTNT = body.label.includes('TNT');
@@ -304,6 +325,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           // 점수 획득
           scoreRef.current += 1000;
           onScoreChange(scoreRef.current);
+          createFloatingText(body.position.x, body.position.y - 20, "CRITICAL! +1000", "#10b981");
           
           // 로봇 전용 스파크 연출
           createDebrisParticles(body.position.x, body.position.y, 'robot', 15);
@@ -336,6 +358,92 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     
     // 폭발 불꽃 연출
     createExplosionParticles(x, y);
+  };
+
+  // 공룡 충돌 시 속성별 폭발 및 충격파 처리
+  const triggerDinoExplosion = (dinoBody: Matter.Body) => {
+    const { x, y } = dinoBody.position;
+    const type = dinoBody.label.split('_')[1] as DinoType;
+    
+    // 화면 강한 흔들림
+    shakeIntensityRef.current = 24;
+
+    if (type === DinoType.TYRANNO) {
+      // 대형 화염 폭발 + 물리 충격파 (티라노 특화)
+      triggerTNTExplosion(x, y);
+      createFloatingText(x, y - 25, "TYRANNO EXPLOSION!! 💥", "#f43f5e");
+    } else if (type === DinoType.TRICERA) {
+      // 황금빛 전격 폭사 연출 + 물리 추진력(충격파)
+      sound.playSkill(DinoType.TRICERA);
+      createGoldenLightningParticles(x, y);
+      applyExplosionForce(worldRef.current!, { x, y }, 140, 0.95);
+      createFloatingText(x, y - 25, "TRICERA SHOCKWAVE!! ⚡", "#fbbf24");
+    } else if (type === DinoType.PTERA) {
+      // 청록색 잔해 스파크 + 약한 충격파
+      sound.playSkill(DinoType.PTERA);
+      createCyanBladeParticles(x, y);
+      applyExplosionForce(worldRef.current!, { x, y }, 100, 0.5);
+      createFloatingText(x, y - 25, "PTERA STORM!! 🦅", "#06b6d4");
+    }
+  };
+
+  // 점수 및 텍스트 팝업 이펙트 생성 헬퍼
+  const createFloatingText = (x: number, y: number, text: string, color: string) => {
+    particlesRef.current.push({
+      x,
+      y,
+      vx: (Math.random() - 0.5) * 1.6,
+      vy: -Math.random() * 2 - 1.5, // 위쪽 방향 속도
+      size: 17, // 폰트 크기로 활용
+      color,
+      alpha: 1,
+      life: 0,
+      maxLife: 45,
+      text,
+      gravityEffect: false // 중력 미적용
+    });
+  };
+
+  // 황금 벼락 스파크 파티클 생성
+  const createGoldenLightningParticles = (x: number, y: number) => {
+    const colors = ['#fbbf24', '#f59e0b', '#d97706', '#ffffff'];
+    for (let i = 0; i < 30; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 7 + 3;
+      particlesRef.current.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1,
+        size: Math.random() * 5 + 2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 1,
+        life: 0,
+        maxLife: Math.random() * 25 + 15,
+        gravityEffect: true
+      });
+    }
+  };
+
+  // 청록색 스파크 파티클 생성
+  const createCyanBladeParticles = (x: number, y: number) => {
+    const colors = ['#22d3ee', '#06b6d4', '#0891b2', '#ffffff'];
+    for (let i = 0; i < 25; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 6 + 2.5;
+      particlesRef.current.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 0.5,
+        size: Math.random() * 4 + 1.5,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 1,
+        life: 0,
+        maxLife: Math.random() * 20 + 10,
+        gravityEffect: true
+      });
+    }
   };
 
   // 4. 파티클 연출 생성 헬퍼
@@ -390,10 +498,52 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         Matter.Engine.update(engineRef.current, 16.666); // 60FPS 기준 업데이트
       }
 
-      // 비행 바람 루프음 실시간 속도 연동
+      // 비행 바람 루프음 실시간 속도 연동 및 네온 잔상 꼬리 파티클(Trail) 생성
       if (activeDinoBodyRef.current) {
-        const speed = activeDinoBodyRef.current.speed;
+        const body = activeDinoBodyRef.current;
+        const speed = body.speed;
         sound.updateFlyingWind(speed);
+
+        // 2프레임마다 연기/잔상 파티클 생성하여 비행 시 시인성과 시각 효과 상승
+        if (bgAnimFrameRef.current % 2 === 0 && speed > 0.5) {
+          const type = body.label.split('_')[1];
+          let trailColor = 'rgba(14, 165, 233, 0.4)'; // 티라노: 네온 스카이블루
+          if (type === DinoType.TRICERA) trailColor = 'rgba(245, 158, 11, 0.4)'; // 트리케라: 네온 골드
+          if (type === DinoType.PTERA) trailColor = 'rgba(6, 182, 212, 0.4)'; // 프테라: 네온 시안
+          
+          particlesRef.current.push({
+            x: body.position.x,
+            y: body.position.y,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            size: Math.random() * 8 + 4,
+            color: trailColor,
+            alpha: 0.5,
+            life: 0,
+            maxLife: 20,
+            gravityEffect: false
+          });
+        }
+      }
+
+      // 프테라 분열체 꼬리 효과도 동일 적용
+      if (splitDinosRef.current.length > 0) {
+        splitDinosRef.current.forEach((body) => {
+          if (bgAnimFrameRef.current % 3 === 0 && body.speed > 0.5) {
+            particlesRef.current.push({
+              x: body.position.x,
+              y: body.position.y,
+              vx: (Math.random() - 0.5) * 0.4,
+              vy: (Math.random() - 0.5) * 0.4,
+              size: Math.random() * 6 + 3,
+              color: 'rgba(6, 182, 212, 0.35)',
+              alpha: 0.4,
+              life: 0,
+              maxLife: 15,
+              gravityEffect: false
+            });
+          }
+        });
       }
 
       // 화면 흔들림 감쇄
@@ -832,7 +982,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       p.life++;
       p.x += p.vx;
       p.y += p.vy;
-      p.vy += 0.05; // 파티클 중력 효과
+      
+      // 중력 효과가 비활성화(false)되지 않은 파티클만 중력 가속 적용
+      if (p.gravityEffect !== false) {
+        p.vy += 0.05;
+      }
+      
       p.alpha = Math.max(0, 1 - p.life / p.maxLife);
 
       if (p.life >= p.maxLife) {
@@ -842,10 +997,23 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       ctx.save();
       ctx.globalAlpha = p.alpha;
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
+      
+      // 텍스트 파티클과 일반 불꽃/잔상 파티클 드로잉 분기
+      if (p.text) {
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = p.color;
+        // 크리티컬 텍스트 스타일
+        ctx.font = p.font || 'bold 18px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.text, p.x, p.y);
+      } else {
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
       ctx.restore();
     }
 
