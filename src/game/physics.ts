@@ -63,6 +63,7 @@ export const createBlockBody = (
     density: density,
     friction: friction,
     restitution: restitution,
+    isSleeping: true,
     label: `block_${material}`,
   });
 
@@ -75,6 +76,7 @@ export const createEnemyBody = (x: number, y: number, radius: number): Matter.Bo
     density: 0.002,
     friction: 0.6,
     restitution: 0.2,
+    isSleeping: true,
     label: 'enemy',
   });
 

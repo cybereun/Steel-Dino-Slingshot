@@ -159,6 +159,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   useEffect(() => {
     // 1) 엔진 및 월드 생성
     const engine = Matter.Engine.create({
+      enableSleeping: true,
       gravity: { y: 1.0 }, // 지구 중력 수준
     });
     const world = engine.world;
