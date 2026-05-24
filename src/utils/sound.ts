@@ -418,6 +418,11 @@ class SoundManager {
     if (!this.ctx) return;
     if (this.bgmInterval) return; // 이미 실행 중
 
+    // 만약 Suspended 상태라면 활성화(resume) 시도
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
+
     const savedMute = localStorage.getItem('steel-dino-bgm-muted');
     this.isBgmMuted = savedMute === 'true';
 
@@ -430,8 +435,11 @@ class SoundManager {
     const playBgmStep = () => {
       if (!this.ctx || !this.bgmGain) return;
       
-      // 혹시 suspended 상태이면 무시
-      if (this.ctx.state === 'suspended') return;
+      // 혹시 suspended 상태이면 재생 잠금을 해제(resume) 시도하고 대기
+      if (this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+        return;
+      }
       
       const now = this.ctx.currentTime;
       

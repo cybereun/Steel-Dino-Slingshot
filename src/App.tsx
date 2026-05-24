@@ -39,10 +39,20 @@ function App() {
       setBgTheme(savedTheme as any);
     }
 
-    // 배경음악(BGM) 자동 시동 (첫 사용자의 인터랙션 시 자동 활성화됨)
-    sound.startBGM();
+    // 브라우저 자동재생 보안 정책(Autoplay Policy)을 안전하게 우회하기 위해
+    // 최초 사용자 터치/클릭 제스처가 일어나는 시점에 BGM을 재생합니다.
+    const handleFirstGesture = () => {
+      sound.startBGM();
+      window.removeEventListener('click', handleFirstGesture);
+      window.removeEventListener('touchstart', handleFirstGesture);
+    };
+
+    window.addEventListener('click', handleFirstGesture);
+    window.addEventListener('touchstart', handleFirstGesture);
 
     return () => {
+      window.removeEventListener('click', handleFirstGesture);
+      window.removeEventListener('touchstart', handleFirstGesture);
       sound.stopBGM();
     };
   }, []);
