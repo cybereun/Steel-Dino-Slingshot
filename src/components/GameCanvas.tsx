@@ -1028,9 +1028,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const startX = currentSlingshot.x;
     const startY = currentSlingshot.y - 20;
     
-    // 슬링샷 당긴 거리만큼 속도로 치환
-    const vx = (currentSlingshot.x - currentSlingshot.dragX) * 0.15;
-    const vy = (startY - currentSlingshot.dragY) * 0.15;
+    // 슬링샷 당긴 거리만큼 속도로 치환 (0.15 -> 0.32로 힘 대폭 상향)
+    const vx = (currentSlingshot.x - currentSlingshot.dragX) * 0.32;
+    const vy = (startY - currentSlingshot.dragY) * 0.32;
     
     const dragDist = Math.sqrt(
       Math.pow(currentSlingshot.x - currentSlingshot.dragX, 2) +
@@ -1187,9 +1187,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const dinoBody = createDinoBody(slingshot.x, slingshot.y - 20, currentDinoTypeRef.current);
     Matter.World.add(worldRef.current!, dinoBody);
 
-    // 2) 속도(힘) 주입 (당긴 방향과 거리에 비례)
-    const vx = (slingshot.x - currentSlingshot.dragX) * 0.15;
-    const vy = ((slingshot.y - 20) - currentSlingshot.dragY) * 0.15;
+    // 2) 속도(힘) 주입 (당긴 방향과 거리에 비례, 0.15 -> 0.32로 상향)
+    const vx = (slingshot.x - currentSlingshot.dragX) * 0.32;
+    const vy = ((slingshot.y - 20) - currentSlingshot.dragY) * 0.32;
     Matter.Body.setVelocity(dinoBody, { x: vx, y: vy });
 
     activeDinoBodyRef.current = dinoBody;
