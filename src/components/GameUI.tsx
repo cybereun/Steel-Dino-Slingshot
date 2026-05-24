@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DinoType, type GameLevel } from '../types';
+import { sound } from '../utils/sound';
 
 interface GameUIProps {
   levelData: GameLevel;
@@ -32,6 +33,14 @@ export const GameUI: React.FC<GameUIProps> = ({
   bgTheme,
   onChangeTheme,
 }) => {
+  const [bgmMuted, setBgmMuted] = useState<boolean>(sound.getBgmMuteState());
+
+  const handleToggleBgm = () => {
+    const nextMute = !bgmMuted;
+    setBgmMuted(nextMute);
+    sound.setBgmVolume(nextMute);
+  };
+
   // 별점 달성 진행률 계산
   const getProgressPercent = () => {
     const maxScore = levelData.threeStarScore * 1.1; // 스케일링용
@@ -169,12 +178,22 @@ export const GameUI: React.FC<GameUIProps> = ({
         </div>
       </div>
 
-      {/* 인게임 실시간 다시하기 버튼 */}
+      {/* 인게임 실시간 BGM 토글 및 다시하기 버튼 */}
       {gameState === 'playing' && (
-        <div className="restart-btn-wrapper">
-          <button className="btn-restart-gameplay" onClick={onRestart} title="스테이지 처음부터 다시 도전">
-            다시 하기 🔄
+        <div className="gameplay-controls-wrapper">
+          <button 
+            className={`btn-bgm-toggle ${bgmMuted ? 'muted' : 'active'}`} 
+            onClick={handleToggleBgm} 
+            title={bgmMuted ? "배경음악 켜기" : "배경음악 끄기"}
+          >
+            {bgmMuted ? '🔇 BGM OFF' : '🎵 BGM ON'}
           </button>
+          
+          <div className="restart-btn-wrapper">
+            <button className="btn-restart-gameplay" onClick={onRestart} title="스테이지 처음부터 다시 도전">
+              다시 하기 🔄
+            </button>
+          </div>
         </div>
       )}
 

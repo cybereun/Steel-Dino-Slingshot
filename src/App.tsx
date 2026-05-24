@@ -3,6 +3,7 @@ import { GameCanvas } from './components/GameCanvas';
 import { GameUI } from './components/GameUI';
 import { GAME_LEVELS } from './game/levels';
 import { DinoType } from './types';
+import { sound } from './utils/sound';
 import './App.css';
 
 function App() {
@@ -37,6 +38,13 @@ function App() {
     if (savedTheme && ['space', 'day', 'sunset', 'cyberpunk'].includes(savedTheme)) {
       setBgTheme(savedTheme as any);
     }
+
+    // 배경음악(BGM) 자동 시동 (첫 사용자의 인터랙션 시 자동 활성화됨)
+    sound.startBGM();
+
+    return () => {
+      sound.stopBGM();
+    };
   }, []);
 
   const handleThemeChange = (theme: 'space' | 'day' | 'sunset' | 'cyberpunk') => {

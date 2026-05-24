@@ -3,6 +3,10 @@ class SoundManager {
   private flyingOsc: OscillatorNode | null = null;
   private flyingGain: GainNode | null = null;
   private lastStretchTime = 0;
+  private bgmInterval: any = null;
+  private bgmGain: GainNode | null = null;
+  private isBgmMuted = false;
+  private bgmStep = 0;
 
   private initCtx() {
     if (!this.ctx) {
@@ -406,6 +410,119 @@ class SoundManager {
       curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
     }
     return curve;
+  }
+
+  // BGM 시작 (알고리즘 작곡 루프)
+  startBGM() {
+    this.initCtx();
+    if (!this.ctx) return;
+    if (this.bgmInterval) return; // 이미 실행 중
+
+    const savedMute = localStorage.getItem('steel-dino-bgm-muted');
+    this.isBgmMuted = savedMute === 'true';
+
+    this.bgmGain = this.ctx.createGain();
+    this.bgmGain.gain.setValueAtTime(this.isBgmMuted ? 0 : 0.05, this.ctx.currentTime);
+    this.bgmGain.connect(this.ctx.destination);
+
+    this.bgmStep = 0;
+    
+    const playBgmStep = () => {
+      if (!this.ctx || !this.bgmGain) return;
+      
+      // 혹시 suspended 상태이면 무시
+      if (this.ctx.state === 'suspended') return;
+      
+      const now = this.ctx.currentTime;
+      
+      // A Minor 펜타토닉 스케일 기반 멜로디 & 베이스라인
+      const baseNotes = [55, 55, 65.41, 65.41, 73.42, 73.42, 98, 87.31]; // A1, C2, D2, G2, F2
+      const trebleNotes = [220, 261.63, 293.66, 329.63, 392, 440, 523.25, 587.33]; // A3 ~ D5
+      
+      const step = this.bgmStep % 16;
+      
+      // 1. 저음 베이스 비트 (정박 4분음표마다)
+      if (step % 2 === 0) {
+        const baseIndex = Math.floor(step / 2) % baseNotes.length;
+        const baseFreq = baseNotes[baseIndex];
+        
+        const osc = this.ctx.createOscillator();
+        const oscGain = this.ctx.createGain();
+        
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(baseFreq, now);
+        
+        oscGain.gain.setValueAtTime(0.35, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        
+        osc.connect(oscGain);
+        oscGain.connect(this.bgmGain);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      }
+      
+      // 2. 우주적인 느낌의 신디 아르페지오 멜로디 (리드미컬 엇박)
+      const melodyPattern = [1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0];
+      if (melodyPattern[step] === 1) {
+        const noteIndex = (step * 3 + 2) % trebleNotes.length;
+        const noteFreq = trebleNotes[noteIndex];
+        
+        const osc = this.ctx.createOscillator();
+        const oscGain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(noteFreq, now);
+        
+        // 로우패스 필터로 공명감 부여
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(1200, now);
+        filter.Q.setValueAtTime(3, now);
+        
+        oscGain.gain.setValueAtTime(0.08, now);
+        oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        
+        osc.connect(filter);
+        filter.connect(oscGain);
+        oscGain.connect(this.bgmGain);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+      
+      this.bgmStep++;
+    };
+
+    // 0.25초(8분음표) 주기로 루프
+    this.bgmInterval = setInterval(playBgmStep, 250);
+  }
+
+  stopBGM() {
+    if (this.bgmInterval) {
+      clearInterval(this.bgmInterval);
+      this.bgmInterval = null;
+    }
+    if (this.bgmGain) {
+      this.bgmGain.disconnect();
+      this.bgmGain = null;
+    }
+  }
+
+  setBgmVolume(mute: boolean) {
+    this.initCtx();
+    this.isBgmMuted = mute;
+    localStorage.setItem('steel-dino-bgm-muted', String(mute));
+
+    if (!this.ctx || !this.bgmGain) return;
+    const now = this.ctx.currentTime;
+    
+    // 0.3초간 볼륨을 스무스하게 페이드
+    this.bgmGain.gain.cancelScheduledValues(now);
+    this.bgmGain.gain.linearRampToValueAtTime(mute ? 0 : 0.05, now + 0.3);
+  }
+
+  getBgmMuteState(): boolean {
+    const savedMute = localStorage.getItem('steel-dino-bgm-muted');
+    return savedMute === 'true';
   }
 }
 

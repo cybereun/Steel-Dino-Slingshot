@@ -414,6 +414,54 @@ body {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.2);
 }
+
+.gameplay-controls-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-bgm-toggle {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-bgm-toggle.active {
+  background: linear-gradient(135deg, hsl(271, 91%, 45%) 0%, hsl(200, 95%, 45%) 100%);
+  border: 1px solid rgba(147, 51, 234, 0.4);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+}
+
+.btn-bgm-toggle.active:hover {
+  filter: brightness(1.15);
+  box-shadow: 
+    0 6px 18px rgba(147, 51, 234, 0.4),
+    0 0 15px rgba(14, 165, 233, 0.2);
+  transform: scale(1.01);
+}
+
+.btn-bgm-toggle.muted {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(236, 72, 153, 0.45);
+  color: hsl(330, 81%, 70%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.btn-bgm-toggle.muted:hover {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(236, 72, 153, 0.7);
+  box-shadow: 0 0 12px rgba(236, 72, 153, 0.25);
+  transform: scale(1.01);
+}
+
 .restart-btn-wrapper {
   width: 100%;
   display: flex;
@@ -1327,20 +1375,29 @@ body {
     display: none !important;
   }
 
-  /* 다시하기 버튼 우측 사이드 패널 맨 하단 배치 및 크기 제한 */
-  .restart-btn-wrapper {
+  /* 실시간 BGM 및 다시하기 버튼 영역 우측 사이드 패널 맨 하단 배치 */
+  .gameplay-controls-wrapper {
     margin-top: auto !important;
     margin-bottom: 4px !important;
     width: 100% !important;
     display: flex !important;
-    justify-content: center !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    align-items: center !important;
   }
 
-  .btn-restart-gameplay {
+  .btn-bgm-toggle, .btn-restart-gameplay {
     padding: 8px 12px !important;
     font-size: 0.85rem !important;
     border-radius: 8px !important;
     width: 90% !important;
+    box-sizing: border-box !important;
+  }
+
+  .restart-btn-wrapper {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
   }
 
   /* 결과 모달창 극강의 초소형 최적화 */
