@@ -317,8 +317,8 @@ export const GAME_LEVELS: GameLevel[] = [
     threeStarScore: 7500,
     twoStarScore: 4500,
     obstacles: [
-      { x: 680, y: 500, width: 25, height: 120, material: BlockMaterial.STONE },
-      { x: 740, y: 500, width: 25, height: 120, material: BlockMaterial.STONE },
+      { x: 680, y: 500, width: 20, height: 120, material: BlockMaterial.STONE },
+      { x: 740, y: 500, width: 20, height: 120, material: BlockMaterial.STONE },
       { x: 710, y: 430, width: 100, height: 20, material: BlockMaterial.STONE },
       { x: 690, y: 370, width: 15, height: 100, material: BlockMaterial.GLASS },
       { x: 730, y: 370, width: 15, height: 100, material: BlockMaterial.GLASS },
@@ -330,7 +330,7 @@ export const GAME_LEVELS: GameLevel[] = [
       { x: 790, y: 500, width: 15, height: 120, material: BlockMaterial.WOOD },
     ],
     enemies: [
-      { x: 710, y: 540, radius: 20, hp: 2 },
+      { x: 710, y: 540, radius: 17, hp: 2 },
       { x: 710, y: 155, radius: 24, hp: 3 },
     ],
   },

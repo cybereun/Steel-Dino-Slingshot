@@ -76,6 +76,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const splitDinosRef = useRef<Matter.Body[]>([]); // 프테라 분열체들 추적
   const hasUsedSkillRef = useRef(false);
   const hasExplodedRef = useRef(false);
+  const hasLaunchedFirstDinoRef = useRef(false);
   const blockHpMapRef = useRef<Map<number, number>>(new Map()); // 바디 id별 HP 기록
   const enemyHpMapRef = useRef<Map<number, number>>(new Map());
   const initialEnemyCountRef = useRef(0);
@@ -230,6 +231,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     splitDinosRef.current = [];
     hasUsedSkillRef.current = false;
     hasExplodedRef.current = false;
+    hasLaunchedFirstDinoRef.current = false;
     particlesRef.current = [];
 
     // 6) 충돌 감지 바인딩
@@ -264,7 +266,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         const damage = Math.floor(relativeSpeed * 20);
 
-        if (damage > 15) {
+        if (damage > 15 && hasLaunchedFirstDinoRef.current) {
           handleBodyDamage(bodyA, damage);
           handleBodyDamage(bodyB, damage);
         }
@@ -1174,6 +1176,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const endDrag = () => {
     const currentSlingshot = slingshotRef.current;
     if (!currentSlingshot.isDragging || !currentDinoTypeRef.current) return;
+
+    // 첫 공룡 발사 플래그 참 설정
+    hasLaunchedFirstDinoRef.current = true;
 
     // 즉각적인 Ref 업데이트
     slingshotRef.current.isDragging = false;

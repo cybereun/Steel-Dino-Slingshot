@@ -75,6 +75,9 @@ export const GameUI: React.FC<GameUIProps> = ({
           <button className="btn-back" onClick={onLobby}>
             ◀ 로비로
           </button>
+          <button className="btn-restart-header" onClick={onRestart} title="스테이지 다시 시작">
+            🔄 다시하기
+          </button>
           <span className="level-title">{levelData.name}</span>
 
           {/* 인게임 미니 배경 테마 선택기 */}
