@@ -971,14 +971,159 @@ body {
 
 /* Landscape Mode for low height devices (Smartphones landscape - Canvas & UI Row layout) */
 @media (max-height: 600px) and (orientation: landscape) {
-  .app-root {
+  /* 인게임 상태일 때만 강제 화면 스크롤 차단 및 고정 */
+  .app-root.state-playing,
+  .app-root.state-gameover {
     padding: 4px !important;
     height: 100vh !important;
     max-height: 100vh !important;
     overflow: hidden !important;
-    display: flex;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw;
+  }
+
+  /* 로비 상태일 때는 자연스럽게 세로 스크롤 허용 및 블록화 */
+  .app-root.state-lobby {
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: block !important;
+    padding: 10px !important;
+  }
+
+  .lobby-container {
+    gap: 15px !important;
+    padding: 10px 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .lobby-header-wrapper {
+    margin-bottom: 8px !important;
+  }
+
+  .game-logo {
+    font-size: 2.2rem !important;
+    letter-spacing: -1px !important;
+  }
+
+  .lobby-tagline {
+    font-size: 0.8rem !important;
+    margin-top: 4px !important;
+  }
+
+  .theme-selector-lobby {
+    margin-top: 8px !important;
+    padding: 4px 10px !important;
+    border-radius: 12px !important;
+    gap: 8px !important;
+  }
+
+  .theme-label {
+    font-size: 0.75rem !important;
+  }
+
+  .theme-opt-btn {
+    padding: 3px 8px !important;
+    font-size: 0.75rem !important;
+    border-radius: 8px !important;
+  }
+
+  .lobby-tabs-container {
+    margin-bottom: 12px !important;
+    padding: 4px !important;
+    border-radius: 12px !important;
+    gap: 6px !important;
+  }
+
+  .tab-btn {
+    padding: 6px 12px !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+  }
+
+  .section-title {
+    font-size: 1.05rem !important;
+    margin-bottom: 12px !important;
     justify-content: center;
-    align-items: center;
+  }
+
+  /* 스테이지 카드 목록을 한 행에 3~4개씩 들어갈 수 있도록 200px 그리드로 축소 */
+  .stages-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  /* 카드 본체 초소형 압축 */
+  .stage-card {
+    padding: 12px !important;
+    border-radius: 12px !important;
+  }
+
+  .stage-card::before {
+    height: 3px !important;
+  }
+
+  .stage-card-header {
+    margin-bottom: 8px !important;
+  }
+
+  .stage-num {
+    font-size: 0.75rem !important;
+  }
+
+  .difficulty-badge {
+    font-size: 0.65rem !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+  }
+
+  .stage-name {
+    font-size: 0.95rem !important;
+    margin-top: 4px !important;
+  }
+
+  .stage-stars {
+    font-size: 1.2rem !important;
+    margin-bottom: 8px !important;
+    gap: 4px !important;
+  }
+
+  .stage-info {
+    padding: 8px !important;
+    border-radius: 8px !important;
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .info-row {
+    font-size: 0.75rem !important;
+  }
+
+  .dino-icons {
+    font-size: 0.95rem !important;
+    gap: 2px !important;
+  }
+
+  .btn-play-stage {
+    padding: 8px !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+  }
+
+  .lobby-footer {
+    margin-top: 15px !important;
+  }
+
+  .lobby-footer p {
+    font-size: 0.75rem !important;
   }
 
   .game-play-container {
