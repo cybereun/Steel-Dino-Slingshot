@@ -1204,8 +1204,34 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
   };
 
+  // 모바일 브라우저 터치 스크롤 및 튕김 방지를 위한 네이티브 이벤트 리스너 바인딩
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const preventDefault = (e: TouchEvent) => {
+      // 슬링샷 조작 중이거나 공룡이 날아가고 있을 때는 터치 무시 및 스크롤 차단
+      if (slingshotRef.current.isDragging || activeDinoBodyRef.current) {
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    // passive: false 옵션으로 preventDefault가 브라우저에 의해 무시되지 않도록 강제
+    canvas.addEventListener('touchstart', preventDefault, { passive: false });
+    canvas.addEventListener('touchmove', preventDefault, { passive: false });
+    canvas.addEventListener('touchend', preventDefault, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('touchstart', preventDefault);
+      canvas.removeEventListener('touchmove', preventDefault);
+      canvas.removeEventListener('touchend', preventDefault);
+    };
+  }, []);
+
   return (
-    <div className="relative border-4 border-slate-700 rounded-xl overflow-hidden shadow-2xl bg-slate-950">
+    <div className="game-canvas-wrapper relative border-4 border-slate-700 rounded-xl overflow-hidden shadow-2xl bg-slate-950">
       <canvas
         ref={canvasRef}
         width={800}

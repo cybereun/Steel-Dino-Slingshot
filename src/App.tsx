@@ -132,8 +132,18 @@ function App() {
   });
 
   return (
-    <div className={`app-root theme-${bgTheme}`}>
-      {appState === 'lobby' ? (
+    <>
+      {/* 모바일 세로 모드 회전 안내 오버레이 */}
+      <div className="rotate-device-overlay">
+        <div className="rotate-device-content">
+          <div className="rotate-icon">🔄</div>
+          <h2>화면을 가로로 회전해주세요</h2>
+          <p>이 게임은 가로 화면(Landscape)에 최적화되어 있습니다.</p>
+        </div>
+      </div>
+
+      <div className={`app-root theme-${bgTheme}`}>
+        {appState === 'lobby' ? (
         <div className="lobby-container animate-fade-in">
           <header className="lobby-header-wrapper">
             <div className="lobby-header">
@@ -296,6 +306,7 @@ function App() {
         </div>
       )}
     </div>
+    </>
   );
 }
 
