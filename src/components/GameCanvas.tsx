@@ -122,15 +122,27 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       let transparentCount = 0;
       let nonTransparentCount = 0;
 
-      // 마젠타 (#ff00ff) 계열 색상 투명화 (R과 B가 높고 G가 낮은 계열)
+      // 마젠타 (#ff00ff, R=255, G=0, B=255) 계열 색상 투명화 (유클리드 거리 및 외곽선 페더링 적용)
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
 
-        // 핑크/자홍색 마젠타 범위 감지 (R > 130, B > 130이고 R-G > 50, B-G > 50)
-        if (r > 130 && b > 130 && r - g > 50 && b - g > 50) {
-          data[i + 3] = 0; // Alpha = 0 (투명)
+        // 마젠타 색상과의 유클리드 거리 계산
+        const dr = r - 255;
+        const dg = g - 0;
+        const db = b - 255;
+        const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+
+        // 완벽한 자홍색 및 매우 유사한 색상 영역 (임계값 185 이하)은 완전 투명화
+        if (dist < 185) {
+          data[i + 3] = 0;
+          transparentCount++;
+        } 
+        // 경계선(안티앨리어싱 픽셀, 임계값 185 ~ 225)은 알파값을 서서히 감쇄시켜 부드럽게 페더링
+        else if (dist < 225) {
+          const ratio = (dist - 185) / (225 - 185);
+          data[i + 3] = Math.floor(data[i + 3] * ratio);
           transparentCount++;
         } else {
           nonTransparentCount++;
